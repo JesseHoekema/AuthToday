@@ -6,12 +6,12 @@ Clone deze repo en host het zelf op een server. Binnenkort ook een hosted versio
 
 ## Support
 - Microsoft SSO (**MET** 2FA instellen popup)
+- Microsoft SSO (**ZONDER** 2FA instellen popup)
 - We zijn bezig om meer opties toe te voegen
 
 
 ## Help eraan mee!
 We zoeken op dit moment nog mensen die ook somtoday gebruiken en een van de volgende login methodes hebben:
-- Microsoft SSO (**ZONDER** 2FA instellen popup)
 - SomToday username/password login
   
 Ben je iemand of ken je iemand die hieraan wil mee helpen contact me op discord: jessiflessi1

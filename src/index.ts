@@ -3,8 +3,9 @@ import fastify from 'fastify';
 
 const app = fastify();
 
+
 app.post('/get-token', async (req, res) => {
-  const { organisatie, username, password } = req.body;
+  const { organisatie, username, password } = req.body as any;
 
   if (!organisatie || !username || !password) {
     return res.status(400).send({ error: 'Missing required parameters' });
@@ -45,9 +46,41 @@ app.post('/get-token', async (req, res) => {
         return res.status(401).send({ error: `Password error: ${passtext}` });
       }
 
+      console.log(page.url());
+      if (page.url().includes('https://leerling.somtoday.nl/login')) {
+        console.log('Login successful without additional verification');
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        const accessToken = await page.evaluate(() => {
+          return Object.keys(localStorage)
+            .filter(key => key.includes('CapacitorStorage'))
+            .map(key => {
+              try {
+                const data = JSON.parse(localStorage.getItem(key) || '');
+                console.log(data);
+                return data?.access_token || null;
+              } catch {
+                return null;
+              }
+            })
+            .find(token => token !== null) || null;
+        });
+
+        await browser.close();
+
+        return res.send({
+          success: true,
+          message: 'Login successful',
+          data: {
+            accessToken: accessToken,
+            tokenType: 'Bearer',
+            issuedAt: new Date().toISOString()
+          }
+        });
+      }
+
+
       await page.waitForSelector('#heading');
       const headingText = await page.$eval('#heading', el => el.textContent?.trim() || '');
-      
       if (headingText === "Laten we uw account veilig houden") {
         await page.waitForSelector('#idSubmit_ProofUp_Redirect');
         await page.click('#idSubmit_ProofUp_Redirect');
@@ -71,7 +104,15 @@ app.post('/get-token', async (req, res) => {
         });
 
         await browser.close();
-        return res.send({ accessToken });
+        return res.send({
+          success: true,
+          message: 'Login successful',
+          data: {
+            accessToken: accessToken,
+            tokenType: 'Bearer',
+            issuedAt: new Date().toISOString()
+          }
+        });
       } else {
         await browser.close();
         return res.status(401).send({ error: 'This step is not supported and added yet' });
